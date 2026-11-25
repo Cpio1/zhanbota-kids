@@ -1,0 +1,63 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # base_path: "" при собственном домене, "/<имя-репозитория>" для <user>.github.io/<repo>
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static export
+        run: npm run build
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Prepare Pages output
+        run: |
+          test -f out/index.html || { echo "out/index.html not found"; exit 1; }
+          grep -q "\"${{ steps.pages.outputs.base_path }}/_next/static/" out/index.html \
+            || { echo "index.html: asset paths do not match base_path"; exit 1; }
+          touch out/.nojekyll
+          # Собственный домен: задайте переменную репозитория CUSTOM_DOMAIN (Settings → Variables).
+          if [ -n "${{ vars.CUSTOM_DOMAIN }}" ]; then echo "${{ vars.CUSTOM_DOMAIN }}" > out/CNAME; fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

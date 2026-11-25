@@ -1,0 +1,252 @@
+@import "tailwindcss";
+
+/* Тёмный вариант Tailwind полностью отключён: класс-селектор, который никогда не используется. */
+@custom-variant dark (&:where(.__dark-mode-disabled, .__dark-mode-disabled *));
+
+@theme {
+  --color-sun: #f5b041;
+  --color-sun-deep: #b8770f;
+  --color-sun-soft: #fde7b8;
+  --color-teal: #67c8c7;
+  --color-teal-deep: #23807f;
+  --color-teal-soft: #cdeeee;
+  --color-peach: #e99560;
+  --color-peach-deep: #b85a22;
+  --color-peach-soft: #fbdcc6;
+  --color-leaf: #8ccb87;
+  --color-leaf-deep: #3f8a3a;
+  --color-leaf-soft: #d9efd6;
+  --color-cream: #fff4dc;
+  --color-cream-deep: #fbe6b9;
+  --color-sky: #91d5f5;
+  --color-sky-soft: #d8f0fc;
+  --color-ink: #34454a;
+  --color-ink-soft: #5a6b70;
+  --color-wa: #1fa855;
+
+  --font-sans: var(--font-nunito), "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: var(--font-nunito), "Nunito", system-ui, sans-serif;
+
+  --animate-drift: drift 38s ease-in-out infinite alternate;
+  --animate-drift-slow: drift 60s ease-in-out infinite alternate;
+  --animate-bob: bob 6s ease-in-out infinite;
+  --animate-sway: sway 7s ease-in-out infinite;
+  --animate-twinkle: twinkle 4.5s ease-in-out infinite;
+  --animate-spin-slow: spin 70s linear infinite;
+  --animate-flap: flap 0.9s ease-in-out infinite;
+  --animate-blink: blink 5.5s ease-in-out infinite;
+}
+
+@keyframes drift {
+  from { transform: translateX(-14px); }
+  to { transform: translateX(18px); }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+@keyframes twinkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  45% { transform: scale(0.72) rotate(18deg); opacity: 0.65; }
+  60% { transform: scale(1.12) rotate(-6deg); opacity: 1; }
+}
+@keyframes flap {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.55); }
+}
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+@keyframes wa-pulse {
+  0% { transform: scale(1); opacity: 0.55; }
+  70%, 100% { transform: scale(1.75); opacity: 0; }
+}
+
+/* ---------- Всегда светлая тема ---------- */
+:root {
+  color-scheme: light only;
+  --header-h: 60px;
+  --section-min-h: calc(100svh - var(--header-h));
+}
+@media (min-width: 1024px) {
+  :root { --header-h: 68px; }
+}
+
+html {
+  color-scheme: light only;
+  background: #fff4dc;
+  color: #34454a;
+  /* Плавная прокрутка и отступ под фиксированную шапку (реальная высота шапки задаётся из JS). */
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-h);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: clip;
+}
+body {
+  background: #fff4dc;
+  color: #34454a;
+  font-family: var(--font-sans);
+  font-feature-settings: "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+  min-width: 320px;
+}
+/* Язык RU из localStorage: скрываем на миг до применения перевода (без «мигания» казахского текста). */
+html.lang-pending body { opacity: 0; }
+body { transition: opacity 0.2s ease; }
+
+/* Секции открываются ровно под шапкой. scroll-padding-top у html уже учитывает высоту шапки,
+   поэтому scroll-margin-top секций — только небольшой визуальный зазор (по умолчанию 0). */
+section[id] { scroll-margin-top: var(--section-gap, 0px); }
+
+::selection { background: #f5b041; color: #34454a; }
+
+:focus-visible {
+  outline: 3px solid #23807f;
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+img, video { max-width: 100%; }
+
+@layer components {
+  .container-zh {
+    width: 100%;
+    margin-inline: auto;
+    max-width: 1200px;
+    padding-inline: 16px;
+  }
+  @media (min-width: 640px) { .container-zh { padding-inline: 28px; } }
+  /* Справа и слева на десктопе — поле, где живёт плавающая кнопка WhatsApp, не перекрывая контент. */
+  @media (min-width: 1024px) { .container-zh { padding-inline: 88px; max-width: 1360px; } }
+
+  /* Секция: на десктопе занимает доступную высоту под шапкой, но может расти (масштаб, низкие экраны). */
+  .section-zh {
+    position: relative;
+    isolation: isolate;
+    padding-block: clamp(48px, 9vw, 72px);
+  }
+  @media (min-width: 1024px) {
+    .section-zh {
+      min-height: var(--section-min-h);
+      display: flex;
+      align-items: center;
+      padding-block: clamp(20px, 4.2vh, 48px);
+    }
+  }
+
+  .h-display {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+  }
+  .h-section {
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 1.1;
+    font-size: clamp(1.65rem, 1.1rem + 2.2vw, 2.15rem);
+  }
+  @media (min-width: 1024px) {
+    .h-section { font-size: clamp(1.7rem, min(2.4vw, 4.6vh), 2.6rem); }
+  }
+  .lead-zh {
+    font-size: clamp(0.98rem, 0.9rem + 0.35vw, 1.1rem);
+    line-height: 1.6;
+    color: #4a5b60;
+  }
+  @media (min-width: 1024px) {
+    .lead-zh { font-size: clamp(0.95rem, min(1.05vw, 2.2vh), 1.12rem); }
+  }
+
+  .kicker-zh {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .btn-zh {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 1rem;
+    line-height: 1.15;
+    white-space: nowrap;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, background-color 0.2s ease;
+    will-change: transform;
+  }
+  .btn-zh:hover { transform: translateY(-2px) scale(1.03); }
+  .btn-zh:active { transform: translateY(1px) scale(0.97); }
+  .btn-zh svg { flex-shrink: 0; }
+
+  .clip-blob-a { -webkit-clip-path: url(#clip-blob-a); clip-path: url(#clip-blob-a); }
+  .clip-blob-b { -webkit-clip-path: url(#clip-blob-b); clip-path: url(#clip-blob-b); }
+  .clip-blob-c { -webkit-clip-path: url(#clip-blob-c); clip-path: url(#clip-blob-c); }
+  .clip-cloud { -webkit-clip-path: url(#clip-cloud); clip-path: url(#clip-cloud); }
+  .clip-drop { -webkit-clip-path: url(#clip-drop); clip-path: url(#clip-drop); }
+  .clip-arch { -webkit-clip-path: url(#clip-arch); clip-path: url(#clip-arch); }
+  .clip-flower { -webkit-clip-path: url(#clip-flower); clip-path: url(#clip-flower); }
+  .clip-wavy { -webkit-clip-path: url(#clip-wavy); clip-path: url(#clip-wavy); }
+  .clip-leaf { -webkit-clip-path: url(#clip-leaf); clip-path: url(#clip-leaf); }
+}
+
+/* Уважение к настройке «Уменьшить движение». */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------- Маскот: вторичные движения (secondary action, follow through) ---------- */
+.camel-blink { animation: blink 5.5s ease-in-out infinite; }
+.camel-head { animation: camel-tilt 7s ease-in-out infinite; }
+.camel-breathe { animation: camel-breathe 4.2s ease-in-out infinite; }
+.camel-scarf { animation: camel-scarf 4.2s ease-in-out infinite; }
+.camel-arm-wave { animation: camel-wave 4.6s cubic-bezier(0.45, 0, 0.3, 1) infinite; }
+.camel-flash { animation: twinkle 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.camel-pin { animation: bob 2.8s ease-in-out infinite; }
+.camel-hearts { animation: bob 3.4s ease-in-out infinite; }
+
+@keyframes camel-tilt {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(-3deg); }
+  65% { transform: rotate(2.5deg); }
+}
+@keyframes camel-breathe {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.012, 1.03); }
+}
+@keyframes camel-scarf {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(4deg); }
+}
+/* Взмах лапкой: anticipation (замах назад) → два взмаха → follow through → пауза. */
+@keyframes camel-wave {
+  0%, 62%, 100% { transform: rotate(var(--a0)); }
+  8% { transform: rotate(var(--a2)); }
+  20% { transform: rotate(var(--a1)); }
+  32% { transform: rotate(var(--a0)); }
+  44% { transform: rotate(var(--a1)); }
+  56% { transform: rotate(calc(var(--a0) + (var(--a0) - var(--a1)) * 0.15)); }
+}
